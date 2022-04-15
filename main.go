@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/shomali11/slacker"
 )
@@ -12,7 +13,7 @@ import (
 func printCommandEvents(analyticsChannel <-chan *slacker.CommandEvent) {
 	for event := range analyticsChannel {
 		fmt.Println("Command Events")
-		fmt.Println(event.Timestamps)
+		fmt.Println(event.Timestamp)
 		fmt.Println(event.Command)
 		fmt.Println(event.Parameters)
 		fmt.Println(event.Event)
@@ -28,13 +29,21 @@ func main() {
 
 	go printCommandEvents(bot.CommandEvents())
 
-	bot.Command("my yob iss <year>", &slacker.CommandDefinition){
+	bot.Command("my yob is <year>", &slacker.CommandDefinition{
 		Description: "yob calculator",
-		Example: "my yob is 2020",
-		Handler: func(botCtx slacker.BotContext, request slacker.Request, response slacker.ResponseWriter){
-			
-		}
-	}
+		Example:     "my yob is 2020",
+		Handler: func(botCtx slacker.BotContext, request slacker.Request, response slacker.ResponseWriter) {
+			year := request.Param("year")
+			yob, err := strconv.Atoi(year)
+			if err != nil {
+				fmt.Println(err)
+			}
+			age := 2021 - yob
+			r := fmt.Sprintf("age is %d", age)
+			response.Reply(r)
+		},
+	})
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
